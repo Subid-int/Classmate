@@ -1,0 +1,1400 @@
+<!DOCTYPE html>
+  <!-- Quick stats widget -->
+  <div id="quickStats" style="margin-bottom:4px"></div>
+
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>OUTR · CSE 4th Sem · G3</title>
+<style>
+/* ── FONT: Nunito — reliable, beautiful, works offline on Android ── */
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&display=swap');
+
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#07090F;--s1:#101522;--s2:#161E30;--s3:#1C263A;
+  --bd1:#1E2D45;--bd2:#253348;--bd3:#2D3E58;
+  --w:#DDE8FF;--m1:#4A5C7A;--m2:#7890B0;
+  --acc:#2A7DD2;--acc2:#5BA0F0;
+  --teal:#18C4A8;--grn:#20C878;--gld:#F0BE28;--org:#F07830;
+  --ros:#EE4870;--vio:#9878E8;
+  --pres:#20C878;--abs:#EE4870;--canc:#F0BE28;--hol:#9878E8;
+  --ff:'Nunito','Segoe UI',system-ui,-apple-system,sans-serif;
+  --r:14px;
+}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{font-family:var(--ff);background:var(--bg);color:var(--w);min-height:100vh;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:radial-gradient(ellipse 70% 50% at 15% 0%,rgba(42,125,210,.14) 0%,transparent 55%),
+  radial-gradient(ellipse 50% 40% at 85% 100%,rgba(24,196,168,.09) 0%,transparent 55%)}
+
+/* ── LAYOUT ── */
+.page{position:relative;z-index:1;max-width:680px;margin:0 auto;padding:0 14px 80px}
+
+/* ── HEADER ── */
+header{padding:28px 0 20px;display:flex;flex-direction:column;align-items:center;text-align:center}
+.badge{
+  display:inline-flex;align-items:center;gap:6px;
+  font-size:10.5px;font-weight:700;letter-spacing:2px;text-transform:uppercase;
+  color:var(--acc2);border:1px solid rgba(91,160,240,.3);
+  background:rgba(42,125,210,.09);border-radius:100px;
+  padding:5px 14px;margin-bottom:13px;max-width:100%;
+}
+.badge span{width:6px;height:6px;border-radius:50%;background:var(--acc2);flex-shrink:0}
+h1{font-size:clamp(1.75rem,6vw,2.8rem);font-weight:900;line-height:1.1;margin-bottom:6px;
+  background:linear-gradient(135deg,var(--w) 25%,var(--acc2));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.h1-sub{font-size:12px;color:var(--m2);margin-bottom:20px}
+
+/* ── CLOCK ── */
+.clock-strip{
+  display:flex;align-items:center;gap:10px;
+  background:var(--s1);border:1px solid var(--bd2);
+  border-radius:100px;padding:9px 18px;margin-bottom:22px;
+  width:fit-content;max-width:calc(100vw - 32px);overflow:hidden;
+}
+.ct{font-size:1.05rem;font-weight:800;color:var(--gld);letter-spacing:.5px;white-space:nowrap}
+.cd{font-size:12.5px;font-weight:600;white-space:nowrap}
+.cday{background:rgba(42,125,210,.2);border:1px solid rgba(42,125,210,.35);color:var(--acc2);
+  border-radius:100px;padding:2px 10px;font-size:11px;font-weight:700;white-space:nowrap}
+
+/* ── TABS ── */
+.tabs{display:flex;gap:0;background:var(--s1);border:1.5px solid var(--bd2);border-radius:12px;padding:4px;margin-bottom:20px;width:100%}
+.tb{flex:1;font-family:var(--ff);font-size:12.5px;font-weight:700;padding:9px 6px;border-radius:9px;border:none;background:transparent;color:var(--m2);cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:5px}
+.tb.active{background:linear-gradient(135deg,rgba(42,125,210,.35),rgba(42,125,210,.15));color:var(--w);box-shadow:0 2px 10px rgba(42,125,210,.2)}
+.tb:hover:not(.active){color:var(--w)}
+
+/* ── PANELS ── */
+.panel{display:none}.panel.active{display:block}
+
+/* ── STATUS ── */
+#cs{background:var(--s1);border:1.5px solid var(--bd2);border-radius:var(--r);
+  padding:11px 16px;margin-bottom:18px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+  position:relative;overflow:hidden}
+#cs::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--acc);border-radius:3px 0 0 3px}
+.sdot{width:8px;height:8px;border-radius:50%;background:var(--grn);box-shadow:0 0 8px var(--grn);animation:pulse 2s infinite;flex-shrink:0}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.8)}}
+#st{font-size:13.5px;font-weight:600;flex:1;min-width:0}
+#nx{font-size:11.5px;color:var(--m2)}
+
+/* ── SEC LABEL ── */
+.sl{font-size:10px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:var(--m1);margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.sl::after{content:'';flex:1;height:1px;background:var(--bd1)}
+
+/* ── DAY NAV ── */
+.dnav{display:flex;gap:6px;margin-bottom:18px;flex-wrap:wrap}
+.dnav button{font-family:var(--ff);font-size:12px;font-weight:700;padding:7px 13px;border-radius:100px;border:1.5px solid var(--bd2);background:var(--s1);color:var(--m2);cursor:pointer;transition:all .2s;white-space:nowrap}
+.dnav button:hover{border-color:var(--acc2);color:var(--w)}
+.dnav button.active{background:linear-gradient(135deg,rgba(42,125,210,.3),rgba(42,125,210,.1));border-color:var(--acc);color:var(--w)}
+.dnav button.tbtn{border-color:var(--gld);color:var(--gld)}
+.dnav button.tbtn.active{background:linear-gradient(135deg,rgba(240,190,40,.18),rgba(240,190,40,.05))}
+
+/* ── DATE ROW ── */
+.drow{display:flex;align-items:center;gap:8px;margin-bottom:24px;flex-wrap:wrap}
+.drow label{font-size:12px;font-weight:600;color:var(--m2);white-space:nowrap}
+.drow input[type=date]{
+  background:var(--s1);border:1.5px solid var(--bd2);color:var(--w);
+  border-radius:100px;padding:7px 14px;font-family:var(--ff);font-size:12.5px;
+  font-weight:600;cursor:pointer;outline:none;color-scheme:dark;
+  min-width:0;flex:1;max-width:180px;
+}
+.drow input[type=date]:focus{border-color:var(--acc)}
+.gbtn{background:transparent;border:1.5px solid var(--bd2);color:var(--m2);
+  border-radius:100px;padding:7px 13px;font-family:var(--ff);font-size:12px;
+  font-weight:600;cursor:pointer;transition:all .2s;white-space:nowrap}
+.gbtn:hover{border-color:var(--gld);color:var(--gld)}
+
+/* ── TWO COL ── */
+.two{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:24px}
+@media(max-width:480px){.two{grid-template-columns:1fr}}
+.dc{background:var(--s1);border:1.5px solid var(--bd2);border-radius:var(--r);overflow:hidden}
+.dch{padding:11px 14px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--bd1)}
+.dn{font-size:.9rem;font-weight:800}
+.dbd{font-size:10px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;border-radius:100px;padding:3px 10px}
+.bt{background:rgba(240,190,40,.15);color:var(--gld);border:1px solid rgba(240,190,40,.3)}
+.bm{background:rgba(42,125,210,.15);color:var(--acc2);border:1px solid rgba(42,125,210,.3)}
+
+/* ── PERIOD ITEMS ── */
+.pl{padding:7px 9px;display:flex;flex-direction:column;gap:5px}
+.pi{border-radius:9px;padding:8px 11px;border:1.5px solid var(--bd1);background:var(--s2);display:flex;align-items:center;gap:8px;transition:transform .15s;position:relative;overflow:hidden}
+.pi:hover{transform:translateX(2px)}
+.pi.now{border-color:var(--gld);background:linear-gradient(135deg,rgba(240,190,40,.1),rgba(240,190,40,.02));box-shadow:0 0 16px rgba(240,190,40,.1)}
+.pi.done{opacity:.38}
+.pi.labp{border-color:rgba(24,196,168,.28)}
+.pi.lunch,.pi.free{border-style:dashed;background:transparent;justify-content:center;font-size:11.5px;color:var(--m1)}
+.pi.lunch{opacity:.5}
+.pi.free{opacity:.22}
+.sp{width:34px;height:34px;border-radius:8px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:900}
+.pdv{width:2px;height:28px;border-radius:2px;flex-shrink:0}
+.pi-info{flex:1;min-width:0}
+.pn{font-size:.85rem;font-weight:800}
+.pm{font-size:10.5px;color:var(--m2);margin-top:1px;display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.pr{background:rgba(42,125,210,.14);color:var(--acc2);border-radius:5px;padding:1px 6px;font-size:10px;font-weight:700}
+.nb{font-size:9px;font-weight:800;letter-spacing:.8px;background:var(--gld);color:#000;border-radius:100px;padding:2px 7px;animation:pulse 2s infinite;flex-shrink:0}
+
+/* ── PROGRESS ── */
+.dp{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--m2);margin-bottom:14px;font-weight:600}
+.pb{flex:1;height:5px;background:var(--bd1);border-radius:3px;overflow:hidden}
+.pf{height:100%;background:linear-gradient(90deg,var(--acc),var(--teal));border-radius:3px;transition:width .5s}
+
+/* ── TIMELINE ── */
+#fdv{animation:fu .4s ease both}
+.tl{display:flex;flex-direction:column;gap:5px}
+.tli{display:flex;gap:10px;align-items:stretch}
+.ttc{width:80px;flex-shrink:0;display:flex;flex-direction:column;align-items:flex-end;padding-top:13px}
+.tt{font-size:10.5px;font-weight:700;color:var(--m2);line-height:1.35;text-align:right}
+.tline{display:flex;flex-direction:column;align-items:center;width:18px;flex-shrink:0}
+.tdot{width:10px;height:10px;border-radius:50%;border:2px solid var(--bd2);background:var(--s1);flex-shrink:0;margin-top:16px;transition:all .3s}
+.tdot.active{background:var(--gld);border-color:var(--gld);box-shadow:0 0 10px var(--gld)}
+.tdot.done{background:var(--acc);border-color:var(--acc)}
+.tvl{flex:1;width:2px;background:var(--bd1);margin-top:3px;margin-bottom:-3px}
+.tc{flex:1;border-radius:12px;padding:12px 14px;border:1.5px solid var(--bd1);background:var(--s1);margin-bottom:5px;transition:all .2s;min-width:0}
+.tc:hover{border-color:var(--bd2);transform:translateX(2px)}
+.tc.now{border-color:var(--gld);background:linear-gradient(135deg,rgba(240,190,40,.08),rgba(240,190,40,.02));box-shadow:0 0 20px rgba(240,190,40,.08)}
+.tc.done{opacity:.4}
+.tc.labp{border-color:rgba(24,196,168,.25)}
+.tc.lunch,.tc.free{background:transparent;border-style:dashed;display:flex;align-items:center;gap:6px;color:var(--m1);font-size:12.5px;padding:10px 14px;font-weight:600}
+.tc.hol{background:linear-gradient(135deg,rgba(152,120,232,.1),rgba(152,120,232,.03));border-color:rgba(152,120,232,.3)}
+.tr{display:flex;align-items:flex-start;justify-content:space-between;gap:6px}
+.ts{font-size:.95rem;font-weight:900}
+.tf{font-size:12px;color:var(--m2);margin-top:2px;font-weight:500}
+.tm{display:flex;gap:6px;margin-top:5px;flex-wrap:wrap;align-items:center}
+.trm{background:rgba(42,125,210,.13);color:var(--acc2);border-radius:6px;padding:2px 8px;font-size:11px;font-weight:700}
+.tty{font-size:10px;font-weight:800;letter-spacing:.6px;text-transform:uppercase;border-radius:100px;padding:2px 8px}
+.lec{background:rgba(42,125,210,.1);color:var(--acc2)}
+.lab{background:rgba(24,196,168,.1);color:var(--teal)}
+.tteach{font-size:11px;color:var(--m2);margin-top:3px;font-weight:500}
+.tnb{background:var(--gld);color:#000;font-size:10px;font-weight:800;border-radius:100px;padding:3px 9px;animation:pulse 2s infinite;flex-shrink:0}
+.tpb{margin-top:7px;height:3px;background:var(--bd1);border-radius:2px;overflow:hidden}
+.tpf{height:100%;background:linear-gradient(90deg,var(--gld),var(--org));border-radius:2px;transition:width .5s}
+
+/* ═══════════════════════════════════════════════════════════
+   ATTENDANCE
+══════════════════════════════════════════════════════════ */
+.ath{display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:16px}
+.att{font-size:1.1rem;font-weight:900}
+.ats{font-size:12px;color:var(--m2);margin-top:3px;font-weight:500}
+.btn-d{background:rgba(238,72,112,.1);border:1.5px solid rgba(238,72,112,.3);color:var(--ros);
+  border-radius:100px;padding:7px 13px;font-family:var(--ff);font-size:12px;font-weight:700;cursor:pointer;transition:all .2s}
+.btn-d:hover{background:rgba(238,72,112,.2)}
+
+/* Month picker row */
+.mrow{display:flex;align-items:center;gap:8px;margin-bottom:18px;flex-wrap:wrap}
+.mrow label{font-size:12px;font-weight:600;color:var(--m2);white-space:nowrap}
+#mp{background:var(--s1);border:1.5px solid var(--bd2);color:var(--w);
+  border-radius:100px;padding:7px 14px;font-family:var(--ff);font-size:12.5px;
+  font-weight:600;cursor:pointer;outline:none;color-scheme:dark;
+  min-width:140px;max-width:100%;}
+#mp:focus{border-color:var(--acc)}
+
+/* Summary */
+.asm{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-bottom:18px}
+@media(max-width:400px){.asm{grid-template-columns:repeat(2,1fr)}}
+.asc{background:var(--s1);border:1.5px solid var(--bd2);border-radius:12px;padding:12px 10px;text-align:center}
+.asc .av{font-size:1.6rem;font-weight:900;margin-bottom:2px}
+.asc .al{font-size:9.5px;font-weight:800;color:var(--m2);letter-spacing:.5px;text-transform:uppercase}
+.c-grn .av{color:var(--grn)}.c-red .av{color:var(--ros)}.c-gld .av{color:var(--gld)}
+.c-vio .av{color:var(--vio)}.c-acc .av{color:var(--acc2)}.c-org .av{color:var(--org)}
+
+/* Bar chart */
+.cw{background:var(--s1);border:1.5px solid var(--bd2);border-radius:var(--r);padding:16px;margin-bottom:16px}
+.cht{font-size:10px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--m2);margin-bottom:13px}
+.bc{display:flex;flex-direction:column;gap:9px}
+.br{display:flex;align-items:center;gap:9px}
+.bl{font-size:11px;font-weight:800;width:52px;text-align:right;flex-shrink:0;color:var(--m2)}
+.bt2{flex:1;height:18px;background:var(--bd1);border-radius:9px;overflow:hidden;position:relative}
+.bf{height:100%;border-radius:9px;transition:width .7s cubic-bezier(.4,0,.2,1);position:relative;display:flex;align-items:center;justify-content:flex-end;padding-right:7px}
+.bp{font-size:10.5px;font-weight:800;color:#fff;white-space:nowrap}
+.bct{font-size:10.5px;color:var(--m2);font-weight:600;width:52px;flex-shrink:0;text-align:right}
+
+/* ═══════════ CALENDAR ═══════════ */
+.calw{background:var(--s1);border:1.5px solid var(--bd2);border-radius:var(--r);padding:16px;margin-bottom:16px}
+.calnav{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;gap:8px}
+.cnt{font-size:1rem;font-weight:900;text-align:center;flex:1}
+.cnb{background:transparent;border:1.5px solid var(--bd2);color:var(--m2);
+  border-radius:100px;padding:5px 12px;cursor:pointer;font-family:var(--ff);font-size:12px;font-weight:700;transition:all .2s;white-space:nowrap}
+.cnb:hover{border-color:var(--acc2);color:var(--w)}
+
+/* Legend */
+.cal-leg{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px;font-size:11px;color:var(--m2);font-weight:600}
+.cld{display:flex;align-items:center;gap:4px}
+.clb{width:10px;height:10px;border-radius:3px;flex-shrink:0}
+
+/* Day headers */
+.cdh{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-bottom:4px;width:100%}
+.cdhi{text-align:center;font-size:9.5px;font-weight:800;color:var(--m1);padding:3px 0;letter-spacing:.5px}
+
+/* Calendar grid — THE FIX: use percentage-based sizing only */
+.cgrid{
+  display:grid;
+  grid-template-columns:repeat(7,1fr);
+  gap:3px;
+  width:100%;
+}
+.cc{
+  aspect-ratio:1;
+  border-radius:7px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  font-size:11px;font-weight:700;
+  background:var(--s2);border:1.5px solid var(--bd1);
+  cursor:pointer;transition:all .15s;
+  position:relative;gap:2px;
+  min-width:0;/* prevent overflow */
+  overflow:hidden;
+  width:100%;/* fill the grid cell */
+}
+.cc:hover:not(.empty):not(.nc){border-color:var(--bd3)}
+.cc.empty{background:transparent;border-color:transparent;cursor:default}
+.cc.nc{opacity:.18;cursor:default}
+.cc.tc2{border-color:var(--gld)!important;color:var(--gld)}
+.cc.fp{background:rgba(32,200,120,.15);border-color:rgba(32,200,120,.4);color:var(--grn)}
+.cc.pa{background:rgba(240,190,40,.1);border-color:rgba(240,190,40,.3);color:var(--gld)}
+.cc.aa{background:rgba(238,72,112,.1);border-color:rgba(238,72,112,.3);color:var(--ros)}
+.cc.ac{background:rgba(42,125,210,.08);border-color:rgba(42,125,210,.25);color:var(--acc2)}
+.cc.hday{background:rgba(152,120,232,.1);border-color:rgba(152,120,232,.3);color:var(--vio)}
+.cc.exam{background:rgba(238,72,112,.12);border-color:rgba(238,72,112,.35);color:var(--ros)}
+.cc.clstest{background:rgba(240,190,40,.1);border-color:rgba(240,190,40,.3);color:var(--gld)}
+.cc.brk{background:rgba(32,200,120,.1);border-color:rgba(32,200,120,.3);color:var(--grn)}
+.cc.info-ev{border-color:rgba(240,120,48,.3);color:var(--org)}
+.cdots{display:flex;gap:2px}
+.cdot{width:4px;height:4px;border-radius:50%}
+.hol-tag{font-size:7.5px;font-weight:800;color:var(--vio);text-align:center;line-height:1.2;padding:0 2px;overflow:hidden;max-height:18px;word-break:break-word}
+
+/* Holiday info tooltip-like box */
+.hinfo{background:rgba(152,120,232,.08);border:1px solid rgba(152,120,232,.2);border-radius:9px;padding:8px 12px;font-size:11.5px;color:var(--m2);margin-bottom:12px;font-weight:500;display:none}
+.hinfo.show{display:block}
+.hinfo b{color:var(--vio)}
+.hinfo .src{font-size:10px;color:var(--m1);margin-top:4px}
+
+/* ── MODAL ── */
+.mo{position:fixed;inset:0;background:rgba(7,9,15,.88);z-index:1000;display:flex;align-items:flex-end;justify-content:center;padding:0;backdrop-filter:blur(5px)}
+.mo.hidden{display:none}
+.mbox{background:var(--s1);border:1.5px solid var(--bd2);border-top-left-radius:20px;border-top-right-radius:20px;padding:20px 16px;width:100%;max-width:680px;max-height:88vh;overflow-y:auto}
+.mh{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.mtt{font-size:1.05rem;font-weight:900}
+.mcl{background:transparent;border:1.5px solid var(--bd2);color:var(--m2);border-radius:100px;width:30px;height:30px;cursor:pointer;font-size:15px;transition:all .2s;display:flex;align-items:center;justify-content:center;font-family:var(--ff)}
+.mcl:hover{border-color:var(--ros);color:var(--ros)}
+
+/* Holiday notice inside modal */
+.hol-notice{background:rgba(152,120,232,.1);border:1.5px solid rgba(152,120,232,.3);border-radius:10px;padding:10px 14px;margin-bottom:12px;font-size:13px;color:var(--vio);font-weight:600}
+
+/* Quick action row */
+.qa{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap}
+.qab{flex:1;min-width:80px;border-radius:100px;padding:7px 10px;font-size:12px;font-weight:800;font-family:var(--ff);cursor:pointer;border:1.5px solid;transition:all .2s;text-align:center}
+.qab.qp{border-color:rgba(32,200,120,.35);color:var(--grn);background:transparent}
+.qab.qp:hover,.qab.qp.qs{background:rgba(32,200,120,.2);border-color:var(--grn)}
+.qab.qa2{border-color:rgba(238,72,112,.35);color:var(--ros);background:transparent}
+.qab.qa2:hover,.qab.qa2.qs{background:rgba(238,72,112,.2);border-color:var(--ros)}
+.qab.qc{border-color:rgba(240,190,40,.35);color:var(--gld);background:transparent}
+.qab.qc:hover,.qab.qc.qs{background:rgba(240,190,40,.15);border-color:var(--gld)}
+
+/* Modal period rows */
+.mpr{display:flex;align-items:center;justify-content:space-between;gap:8px;
+  padding:9px 11px;border-radius:10px;background:var(--s2);border:1.5px solid var(--bd1);margin-bottom:6px}
+.mpl{display:flex;align-items:center;gap:8px;min-width:0;flex:1}
+.msp{width:32px;height:32px;border-radius:7px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:9.5px;font-weight:900}
+.mpn{font-size:.85rem;font-weight:800}
+.mpt{font-size:10.5px;color:var(--m2);font-weight:500}
+.ab{display:flex;gap:4px;flex-shrink:0}
+.ab button{border-radius:100px;padding:5px 9px;font-size:11px;font-weight:800;font-family:var(--ff);cursor:pointer;border:1.5px solid;transition:all .15s;white-space:nowrap}
+.ab .bp2{border-color:rgba(32,200,120,.3);color:var(--grn);background:transparent}
+.ab .bp2.sel{background:rgba(32,200,120,.2);border-color:var(--grn)}
+.ab .ba{border-color:rgba(238,72,112,.3);color:var(--ros);background:transparent}
+.ab .ba.sel{background:rgba(238,72,112,.2);border-color:var(--ros)}
+.ab .bc2{border-color:rgba(240,190,40,.3);color:var(--gld);background:transparent}
+.ab .bc2.sel{background:rgba(240,190,40,.15);border-color:var(--gld)}
+.msv{width:100%;margin-top:12px;background:linear-gradient(135deg,var(--acc),rgba(42,125,210,.7));border:none;color:var(--w);font-family:var(--ff);font-size:14px;font-weight:800;padding:13px;border-radius:12px;cursor:pointer;transition:opacity .2s;letter-spacing:.5px}
+.msv:hover{opacity:.88}
+
+/* ── LEGEND PANEL ── */
+#legSec{background:var(--s1);border:1.5px solid var(--bd2);border-radius:var(--r);padding:18px;margin-top:0}
+.lgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:8px;margin-top:12px}
+.li{display:flex;align-items:flex-start;gap:9px;background:var(--s2);border:1px solid var(--bd1);border-radius:10px;padding:10px 12px}
+.lpill{width:38px;height:38px;border-radius:8px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:900}
+.lcode{font-size:10px;color:var(--m2);font-weight:600}
+.lname{font-weight:800;font-size:13px}
+.lteach{font-size:11px;color:var(--m2);margin-top:2px;line-height:1.4;font-weight:500}
+
+/* ── BANNERS ── */
+.satban{background:linear-gradient(135deg,rgba(240,120,48,.1),rgba(240,120,48,.02));border:1.5px solid rgba(240,120,48,.3);border-radius:var(--r);padding:24px;text-align:center}
+.satban h2{font-size:1.2rem;font-weight:900;color:var(--org);margin-bottom:6px}
+.satban p{color:var(--m2);font-size:13px;font-weight:500}
+.noclass{background:var(--s1);border:1.5px dashed var(--bd2);border-radius:var(--r);padding:36px;text-align:center}
+.noclass .em{font-size:2.4rem;margin-bottom:9px}
+.noclass h3{font-size:1.05rem;font-weight:900;margin-bottom:5px}
+.noclass p{color:var(--m2);font-size:13px;font-weight:500}
+.inote{background:rgba(42,125,210,.06);border:1px solid rgba(42,125,210,.16);border-radius:8px;padding:8px 12px;font-size:12px;color:var(--m2);margin-bottom:10px;font-weight:500}
+.inote b{color:var(--acc2)}
+
+@keyframes fd{from{opacity:0;transform:translateY(-14px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fu{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+header{animation:fd .6s ease both}
+.tabs,.two,#fdv,.asm,.calw,.cw{animation:fu .5s ease both}
+
+@media(max-width:380px){
+  .ttc{width:68px}.ts{font-size:.88rem}.tc{padding:9px 11px}
+  .ab button{padding:4px 7px;font-size:10.5px}
+}
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--bd2);border-radius:2px}
+</style>
+</head>
+<body>
+<div class="page">
+
+<!-- HEADER -->
+<header>
+  <div class="badge"><span></span>OUTR &nbsp;·&nbsp; CSE 4th Sem &nbsp;·&nbsp; G3 &nbsp;·&nbsp; 2025–26</div>
+  <h1>Class Timetable</h1>
+  <p class="h1-sub">B.Tech CSE · 4th Semester · Room as mentioned · W.E.F. 08.02.2026</p>
+  <div class="clock-strip">
+    <div class="ct" id="clockTime">--:--:--</div>
+    <div class="cd" id="clockDate">---</div>
+    <div class="cday" id="clockDay">---</div>
+  </div>
+</header>
+
+<!-- TABS -->
+<div class="tabs">
+  <button class="tb active" onclick="switchTab('schedule')" id="tab-schedule">📅 Schedule</button>
+  <button class="tb" onclick="switchTab('attendance')" id="tab-attendance">✅ Attendance</button>
+  <button class="tb" onclick="switchTab('subjects')" id="tab-subjects">📚 Subjects</button>
+</div>
+
+<!-- ═══════ SCHEDULE PANEL ═══════ -->
+<div class="panel active" id="panel-schedule">
+  <div id="cs">
+    <div class="sdot" id="sdot"></div>
+    <div id="st">Loading...</div>
+    <div id="nx"></div>
+  </div>
+  <div class="sl">Quick Select Day</div>
+  <div class="dnav">
+    <button onclick="selDay('Monday')"    data-day="Monday">Mon</button>
+    <button onclick="selDay('Tuesday')"   data-day="Tuesday">Tue</button>
+    <button onclick="selDay('Wednesday')" data-day="Wednesday">Wed</button>
+    <button onclick="selDay('Thursday')"  data-day="Thursday">Thu</button>
+    <button onclick="selDay('Friday')"    data-day="Friday">Fri</button>
+    <button onclick="selDay('Saturday')"  data-day="Saturday">Sat</button>
+    <button class="tbtn" onclick="goToday()">📅 Today</button>
+  </div>
+  <div class="drow">
+    <label>Jump to:</label>
+    <input type="date" id="datePicker" onchange="onDatePick()">
+    <button class="gbtn" onclick="goToday()">↩ Today</button>
+  </div>
+  <div class="sl" id="ql">Today &amp; Tomorrow</div>
+  <div class="two" id="quickGrid"></div>
+  <div class="sl" id="fdl" style="margin-top:24px">Full Schedule</div>
+  <div class="dp" id="dpRow" style="display:none">
+    <span id="dpt">0 of 0 done</span>
+    <div class="pb"><div class="pf" id="pf" style="width:0%"></div></div>
+    <span id="dpp">0%</span>
+  </div>
+  <div id="fdv"></div>
+</div>
+
+<!-- ═══════ ATTENDANCE PANEL ═══════ -->
+<div class="panel" id="panel-attendance">
+  <div class="ath">
+    <div>
+      <div class="att">Attendance Tracker</div>
+      <div class="ats">Tap any date on the calendar to mark attendance</div>
+    </div>
+    <button class="btn-d" onclick="confirmClear()">🗑 Clear All</button>
+  </div>
+  <div class="mrow">
+    <label>Month:</label>
+    <input type="month" id="mp" onchange="renderAtt()">
+    <button class="gbtn" onclick="goToCurrentMonth()" title="Jump to present month">📅 Now</button>
+  </div>
+  <div class="asm" id="asum"></div>
+  <div class="cw">
+    <div class="cht">Attendance by Subject</div>
+    <div class="bc" id="barchart"></div>
+  </div>
+    <!-- Academic Events Quick Reference -->
+  <div class="cw" id="acadEvents">
+    <div class="cht acad-toggle" onclick="toggleAcadEvents()" style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none;">
+      <span>📅 Academic Calendar — Key Dates (Spring Sem 2025-26)</span>
+      <span id="acadArrow" style="font-size:16px;transition:transform .3s;flex-shrink:0;margin-left:8px;">▼</span>
+    </div>
+    <div id="acadBody" style="display:none;margin-top:12px;">
+      <div id="acadList" style="display:flex;flex-direction:column;gap:7px;font-size:12.5px;"></div>
+      <div style="margin-top:10px;font-size:10.5px;color:var(--m1);font-weight:600">📄 Source: OUTR Academic Calendar — Spring Semester 2025 (4th Sem UG)</div>
+    </div>
+  </div>
+  <div class="calw">
+    <div class="calnav">
+      <button class="cnb" onclick="chgMo(-1)">← Prev</button>
+      <div class="cnt" id="calTitle"></div>
+      <button class="cnb" onclick="chgMo(1)">Next →</button>
+    </div>
+    <div class="cal-leg">
+      <div class="cld"><div class="clb" style="background:rgba(32,200,120,.5)"></div>Present</div>
+      <div class="cld"><div class="clb" style="background:rgba(240,190,40,.5)"></div>Partial</div>
+      <div class="cld"><div class="clb" style="background:rgba(238,72,112,.5)"></div>Absent</div>
+      <div class="cld"><div class="clb" style="background:rgba(42,125,210,.4)"></div>Cancelled</div>
+      <div class="cld"><div class="clb" style="background:rgba(152,120,232,.5)"></div>Holiday</div>
+      <div class="cld"><div class="clb" style="background:rgba(238,72,112,.5)"></div>Exam/No Class</div>
+      <div class="cld"><div class="clb" style="background:rgba(240,190,40,.5)"></div>Class Test</div>
+      <div class="cld"><div class="clb" style="background:rgba(240,120,48,.4)"></div>Academic Event</div>
+    </div>
+    <div class="cdh">
+      <div class="cdhi">SUN</div><div class="cdhi">MON</div><div class="cdhi">TUE</div>
+      <div class="cdhi">WED</div><div class="cdhi">THU</div><div class="cdhi">FRI</div>
+      <div class="cdhi">SAT</div>
+    </div>
+    <div class="cgrid" id="calGrid"></div>
+  </div>
+  <div class="hinfo" id="hinfo"></div>
+</div>
+
+<!-- ═══════ SUBJECTS PANEL ═══════ -->
+<div class="panel" id="panel-subjects">
+  <div id="legSec">
+    <div class="sl">All Subjects — CSE 4th Sem · Group 3 (G3)</div>
+    <div class="lgrid" id="lgrid"></div>
+  </div>
+</div>
+
+<!-- MODAL (bottom sheet) -->
+<div class="mo hidden" id="modal">
+  <div class="mbox">
+    <div class="mh">
+      <div class="mtt" id="mtt">Mark Attendance</div>
+      <button class="mcl" onclick="closeModal()">✕</button>
+    </div>
+    <div id="holNotice"></div>
+    <!-- Quick actions -->
+    <div class="qa">
+      <button class="qab qp" onclick="setAll('P')" id="qaP">✓ All Present</button>
+      <button class="qab qa2" onclick="setAll('A')" id="qaA">✗ All Absent</button>
+      <button class="qab qc" onclick="setAll('C')" id="qaC">— Cancel All</button>
+    </div>
+    <div id="mperiods"></div>
+    <button class="msv" onclick="saveAtt()">💾 Save Attendance</button>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════
+//  ROBUST STORAGE — works on https://, file://, content://
+//  Uses localStorage with fallback to in-memory store
+// ═══════════════════════════════════════════════════════
+const _memStore = {};
+function _lsAvailable() {
+  try { localStorage.setItem('__test__','1'); localStorage.removeItem('__test__'); return true; }
+  catch(e) { return false; }
+}
+const _useLS = _lsAvailable();
+if(!_useLS) {
+  console.warn('localStorage unavailable — using in-memory store. Data will not persist across sessions. Host on https:// for permanent storage.');
+}
+function lsGet(key) {
+  if(_useLS) { try { return localStorage.getItem(key); } catch(e){} }
+  return _memStore[key] || null;
+}
+function lsSet(key, val) {
+  if(_useLS) { try { localStorage.setItem(key, val); return; } catch(e){} }
+  _memStore[key] = val;
+}
+function lsRemove(key) {
+  if(_useLS) { try { localStorage.removeItem(key); } catch(e){} }
+  delete _memStore[key];
+}
+
+// ═══════════════════════════════════════════════════════════════════
+//  SUBJECTS
+// ═══════════════════════════════════════════════════════════════════
+const SUBJ={
+  DS:        {name:"Database System",                       code:"CS2108",color:"#2A7DD2",bg:"rgba(42,125,210,.2)", teacher:"Dr. Ashis Kumar Mishra"},
+  CN:        {name:"Computer Network",                      code:"CS2104",color:"#20C878",bg:"rgba(32,200,120,.2)", teacher:"Mr. Manoranjan Panda"},
+  COA:       {name:"Computer Organization & Architecture",  code:"CS2102",color:"#18C4A8",bg:"rgba(24,196,168,.2)", teacher:"Dr. Sanjukta Mohanty"},
+  FCCT:      {name:"Fundamentals of Cloud Computing Tech.", code:"CS2110",color:"#F07830",bg:"rgba(240,120,48,.2)",  teacher:"Dr. Subhadarshani Mohanty"},
+  DM:        {name:"Discrete Mathematics",                  code:"CS2106",color:"#EE4870",bg:"rgba(238,72,112,.2)", teacher:"Dr. Pranati Mishra"},
+  OB:        {name:"Organisational Behaviour",              code:"CS2102",color:"#9878E8",bg:"rgba(152,120,232,.2)",teacher:"Mr. Shreemanta Kumar Tripathy"},
+  "CN LAB":  {name:"Computer Network Lab",                  code:"CS2508",color:"#20C878",bg:"rgba(32,200,120,.15)",teacher:"Mr. Manoranjan Panda / Dr. Ashis Kumar Mishra (CSE1,CSE2,CSE3)",lab:true},
+  "JAVA LAB":{name:"Java Laboratory",                       code:"CS2504",color:"#F0BE28",bg:"rgba(240,190,40,.15)",teacher:"Mr. S. Maharana / Dr. Meenakshi Pant (CSE1) · Mrs. Susmita Pal (CSE2,CSE3)",lab:true},
+  "COA LAB": {name:"Computer Organisation Lab",             code:"CS2502",color:"#18C4A8",bg:"rgba(24,196,168,.15)",teacher:"Dr. Sanjukta Mohanty / Dr. Rajalaxmi Padhy (CSE1) · Dr. Pranati Mishra (CSE2) · Mr. Siddhanta Das / Mr. Sumit Mishra (CSE3)",lab:true},
+  "DS LAB":  {name:"Database System Lab",                   code:"CS2506",color:"#2A7DD2",bg:"rgba(42,125,210,.15)",teacher:"Mr. Subasis Mishra / Dr. D. Gountia (CSE1,CSE2,CSE3)",lab:true},
+};
+
+// ═══════════════════════════════════════════════════════════════════
+//  TIME SLOTS
+// ═══════════════════════════════════════════════════════════════════
+const SLOTS=[
+  {id:"s1",label:"9:00–10:00 AM",  start:"09:00",end:"10:00"},
+  {id:"s2",label:"10:00–11:00 AM", start:"10:00",end:"11:00"},
+  {id:"s3",label:"11:00–12:00 PM", start:"11:00",end:"12:00"},
+  {id:"s4",label:"12:00–1:00 PM",  start:"12:00",end:"13:00"},
+  {id:"lb",label:"1:00–2:00 PM",   start:"13:00",end:"14:00",lunch:true},
+  {id:"s5",label:"2:00–3:00 PM",   start:"14:00",end:"15:00"},
+  {id:"s6",label:"3:00–4:00 PM",   start:"15:00",end:"16:00"},
+  {id:"s7",label:"4:00–5:00 PM",   start:"16:00",end:"17:00"},
+];
+
+// ═══════════════════════════════════════════════════════════════════
+//  TIMETABLE (G2)
+// ═══════════════════════════════════════════════════════════════════
+const TT={
+  // ── G3 (CSE3) Schedule — OUTR 4th Sem CSE, W.E.F. 08.02.2026 ──────────
+  // Slots: s1=9-10 | s2=10-11 | s3=11-12 | s4=12-1 | lb=LUNCH | s5=2-3 | s6=3-4 | s7=4-5
+
+  Monday:[
+    {subj:"DS",   room:"C 210"},
+    {subj:"FCCT", room:"C 210"},
+    {subj:"DM",   room:"C 210"},
+    {subj:"CN",   room:"C 210"},
+    null,                           // lunch
+    {subj:"COA",  room:"B 401"},
+    {subj:"OB",   room:"B 401"},
+    null,                           // free
+  ],
+
+  Tuesday:[
+    {subj:"DS",   room:"B 404"},
+    {subj:"CN",   room:"B 404"},
+    {subj:"COA",  room:"B 404"},
+    {subj:"DM",   room:"B 404"},
+    null,                           // lunch
+    // G3 has CN LAB at 2-3 PM
+    {subj:"CN LAB", room:"CL6", note:"G3", lab:true},
+    // JAVA LAB CSE2 MCA LAB at 3-4 is CSE2 only — G3 is FREE
+    null,
+    null,
+  ],
+
+  Wednesday:[
+    // 9-10 free
+    null,
+    // JAVA LAB CSE3 CL4 — 10 AM to 1 PM (3 slots) — G3's lab
+    {subj:"JAVA LAB", room:"CL4", note:"G3", lab:true, spans:3},
+    {subj:"JAVA LAB", room:"CL4", note:"G3", lab:true, cont:true},
+    {subj:"JAVA LAB", room:"CL4", note:"G3", lab:true, cont:true},
+    null,                           // lunch
+    {subj:"COA",  room:"B 401"},
+    {subj:"FCCT", room:"B 401"},
+    {subj:"OB",   room:"B 401"},
+  ],
+
+  Thursday:[
+    {subj:"OB",   room:"B 404"},
+    // DS LAB CSE3 CL4 — 10 AM to 1 PM (3 slots) — G3's lab
+    {subj:"DS LAB", room:"CL4", note:"G3", lab:true, spans:3},
+    {subj:"DS LAB", room:"CL4", note:"G3", lab:true, cont:true},
+    {subj:"DS LAB", room:"CL4", note:"G3", lab:true, cont:true},
+    null,                           // lunch
+    // JAVA LAB CSE1 CL4 — G3 is OFF (2nd half is free for G3)
+    null,
+    null,
+    null,
+  ],
+
+  Friday:[
+    {subj:"DS",   room:"B 404"},
+    {subj:"FCCT", room:"B 404"},
+    {subj:"CN",   room:"B 404"},
+    {subj:"DM",   room:"B 404"},
+    null,                           // lunch
+    // COA LAB CSE3 A306 — 2-5 PM (3 slots) — G3's lab
+    {subj:"COA LAB", room:"A306", note:"G3", lab:true, spans:3},
+    {subj:"COA LAB", room:"A306", note:"G3", lab:true, cont:true},
+    {subj:"COA LAB", room:"A306", note:"G3", lab:true, cont:true},
+  ],
+
+  Saturday:"extra",
+  Sunday:"holiday",
+};
+
+// ═══════════════════════════════════════════════════════════════════
+//  HOLIDAYS — Indian National + Odisha State + Odia Calendar
+//  Format: "YYYY-MM-DD": { name, source, type }
+//  Sources: "national" | "odisha" | "odia-calendar" | "academic"
+// ═══════════════════════════════════════════════════════════════════
+const HOLIDAYS={
+  // ══════════════════════════════════════════════════════════════════
+  //  BPUT / OUTR OFFICIAL HOLIDAY LIST 2026
+  //  Source: BPUT Notification No.BPUT/VI/Estt./277/19/8568
+  //  Date: 06.12.2025 — All 29 official holidays
+  // ══════════════════════════════════════════════════════════════════
+  "2026-01-14":{name:"Makara Sankranti",                                      source:"bput",    type:"festival"},
+  "2026-01-23":{name:"Subash Chandra Bose Jayanti / Veer Surendra Sai Jayanti / Basanta Panchami", source:"bput", type:"state"},
+  "2026-01-26":{name:"Republic Day",                                          source:"national",type:"national"},
+  "2026-03-03":{name:"Dola Purnima",                                          source:"bput",    type:"festival"},
+  "2026-03-04":{name:"Holi",                                                  source:"bput",    type:"festival"},
+  "2026-03-21":{name:"Id-ul-Fitre (Eid)",                                     source:"bput",    type:"festival"},
+  "2026-03-27":{name:"Shree Ram Navami",                                      source:"bput",    type:"festival"},
+  "2026-04-01":{name:"Utkal Divas (Odisha Day)",                              source:"bput",    type:"state"},
+  "2026-04-03":{name:"Good Friday",                                           source:"bput",    type:"national"},
+  "2026-04-14":{name:"Maha Vishuva Sankranti / Dr. B.R. Ambedkar Jayanti",   source:"bput",    type:"national"},
+  "2026-05-01":{name:"Budha Purnima / Birthday of Pt. Raghunath Murmu",      source:"bput",    type:"festival"},
+  "2026-05-16":{name:"Sabitri Amabasya",                                      source:"bput",    type:"festival"},
+  "2026-05-27":{name:"Id-ul-Zuha (Bakrid)",                                   source:"bput",    type:"festival"},
+  "2026-06-15":{name:"Raja Sankranti",                                        source:"bput",    type:"festival"},
+  "2026-06-26":{name:"Muhharram",                                             source:"bput",    type:"festival"},
+  "2026-07-16":{name:"Ratha Yatra",                                           source:"bput",    type:"state"},
+  "2026-08-15":{name:"Independence Day",                                      source:"national",type:"national"},
+  "2026-08-26":{name:"Birthday of Prophet Muhammad",                          source:"bput",    type:"festival"},
+  "2026-08-27":{name:"Jhulana Purnima",                                       source:"bput",    type:"festival"},
+  "2026-09-04":{name:"Janmasthami",                                           source:"bput",    type:"festival"},
+  "2026-09-14":{name:"Ganesh Puja",                                           source:"bput",    type:"festival"},
+  "2026-09-15":{name:"Nuakhai",                                               source:"bput",    type:"state"},
+  "2026-09-16":{name:"Day following Nuakhai",                                 source:"bput",    type:"state"},
+  "2026-10-02":{name:"Gandhi Jayanti",                                        source:"national",type:"national"},
+  "2026-10-17":{name:"Mahasaptami",                                           source:"bput",    type:"festival"},
+  "2026-10-19":{name:"Mahanavami",                                            source:"bput",    type:"festival"},
+  "2026-10-20":{name:"Vijaya Dasami (Dussehra)",                              source:"bput",    type:"festival"},
+  "2026-11-24":{name:"Rahas Purnima",                                         source:"bput",    type:"festival"},
+  "2026-12-25":{name:"X-Mas Day (Christmas)",                                 source:"national",type:"national"},
+
+  // ══════════════════════════════════════════════════════════════════
+  //  ACADEMIC CALENDAR — SPRING SEMESTER 2025 (4th Sem UG)
+  //  Source: OUTR Academic Calendar — Spring Semester 2025
+  //  *** Applicable to: 4th Semester UG ***
+  //  Note: Title says "2025" but all dates are in 2026
+  // ══════════════════════════════════════════════════════════════════
+
+  // Sl.1a — Course Registration without Fine: Jan 27-29, 2026
+  "2026-01-27":{name:"📝 Course Reg. Starts — No Fine",                       source:"academic",type:"exam",      noClass:false,info:true},
+  "2026-01-29":{name:"📝 Course Reg. Ends — No Fine",                        source:"academic",type:"exam",      noClass:false,info:true},
+
+  // Sl.1b — Course Registration with Fine ₹1000: Jan 30-31, 2026
+  "2026-01-30":{name:"📝 Course Reg. with Fine ₹1000 Starts",                source:"academic",type:"exam",      noClass:false,info:true},
+  "2026-01-31":{name:"📝 Course Reg. with Fine ₹1000 Ends",                  source:"academic",type:"exam",      noClass:false,info:true},
+
+  // Sl.2 — Registration Closes: Feb 02, 2026
+  "2026-02-02":{name:"📋 Registration Closes",                                source:"academic",type:"exam",      noClass:false,info:true},
+
+  // Sl.3 — Commencement of Classes: Feb 02, 2026
+  // (same date as registration closes)
+
+  // Sl.4 — Lesson Plan to IQAC: Feb 13, 2026
+  "2026-02-13":{name:"📋 Lesson Plan Submission to IQAC",                    source:"academic",type:"classtest", noClass:false,info:true},
+
+  // Sl.5 — Attendance display Feb 2026: Mar 02-07, 2026
+  "2026-03-02":{name:"📋 Attendance Display for Feb 2026 Starts",            source:"academic",type:"classtest", noClass:false,info:true},
+  "2026-03-07":{name:"📋 Attendance Display for Feb 2026 Ends",              source:"academic",type:"classtest", noClass:false,info:true},
+
+  // Sl.6 — X-Tasy Annual Cultural Event: Mar 18-20, 2026
+  "2026-03-18":{name:"🎭 X-Tasy Annual Cultural Event Starts",               source:"academic",type:"break",     noClass:true},
+  "2026-03-19":{name:"🎭 X-Tasy Annual Cultural Event",                      source:"academic",type:"break",     noClass:true},
+  "2026-03-20":{name:"🎭 X-Tasy Annual Cultural Event Ends",                 source:"academic",type:"break",     noClass:true},
+
+  // Sl.7 — Attendance display March 2026 starts Apr 01
+  "2026-03-31":{name:"📋 Attendance Display for March 2026 Starts (~Apr 1)", source:"academic",type:"classtest", noClass:false,info:true},
+
+  // Sl.8 — MIDTERM EXAMINATIONS: Apr 02-10, 2026
+  // Note: Apr 01 is also Utkal Divas (BPUT holiday) — handled above
+  "2026-04-02":{name:"📝 Midterm Examinations Begin",                        source:"academic",type:"exams",     noClass:true},
+  "2026-04-04":{name:"📝 Midterm Examinations",                              source:"academic",type:"exams",     noClass:true},
+  "2026-04-06":{name:"📝 Midterm Examinations",                              source:"academic",type:"exams",     noClass:true},
+  "2026-04-07":{name:"📝 Midterm Examinations",                              source:"academic",type:"exams",     noClass:true},
+  "2026-04-08":{name:"📝 Midterm Examinations",                              source:"academic",type:"exams",     noClass:true},
+  "2026-04-09":{name:"📝 Midterm Examinations",                              source:"academic",type:"exams",     noClass:true},
+  "2026-04-10":{name:"📝 Midterm Examinations — Last Day",                   source:"academic",type:"exams",     noClass:true},
+
+  // Sl.9 — Attendance display April 2026: May 01-07, 2026
+  "2026-05-04":{name:"📋 Attendance Display for April 2026 (Starts ~May 1)",  source:"academic",type:"classtest", noClass:false,info:true},
+  "2026-05-07":{name:"📋 Attendance Display for April 2026 Ends",            source:"academic",type:"classtest", noClass:false,info:true},
+
+  // Sl.10 — Mid Term Marks Display: May 01-07, 2026
+  // (overlaps with attendance display)
+
+  // Sl.11 — Last Day of Classes: May 29, 2026
+  "2026-05-29":{name:"🔔 Last Day of Classes — Spring Semester",             source:"academic",type:"semclose",  noClass:false,info:true},
+
+  // Sl.12 — Attendance report submission: May 30, 2026
+  "2026-05-30":{name:"📋 Attendance Report Submission by Schools",           source:"academic",type:"classtest", noClass:false,info:true},
+
+  // Sl.13 — Marks Submission: Jun 02-03, 2026
+  "2026-06-02":{name:"📋 Marks Submission by HoS/HoD Starts",               source:"academic",type:"classtest", noClass:false,info:true},
+  "2026-06-03":{name:"📋 Marks Submission by HoS/HoD Ends",                 source:"academic",type:"classtest", noClass:false,info:true},
+
+  // Sl.14 — END TERM EXAMINATIONS: Jun 04-12, 2026
+  "2026-06-04":{name:"📝 End Term Examinations Begin",                       source:"academic",type:"exams",     noClass:true},
+  "2026-06-05":{name:"📝 End Term Examinations",                             source:"academic",type:"exams",     noClass:true},
+  "2026-06-06":{name:"📝 End Term Examinations",                             source:"academic",type:"exams",     noClass:true},
+  "2026-06-07":{name:"📝 End Term Examinations",                             source:"academic",type:"exams",     noClass:true},
+  "2026-06-08":{name:"📝 End Term Examinations",                             source:"academic",type:"exams",     noClass:true},
+  "2026-06-09":{name:"📝 End Term Examinations",                             source:"academic",type:"exams",     noClass:true},
+  "2026-06-10":{name:"📝 End Term Examinations",                             source:"academic",type:"exams",     noClass:true},
+  "2026-06-11":{name:"📝 End Term Examinations",                             source:"academic",type:"exams",     noClass:true},
+  "2026-06-12":{name:"📝 End Term Examinations — Last Day",                  source:"academic",type:"exams",     noClass:true},
+
+  // Sl.15 — Summer Break: Jun 13-30, 2026
+  "2026-06-13":{name:"🎉 Summer Break Begins",                               source:"academic",type:"break",     noClass:true},
+  "2026-06-30":{name:"📊 Declaration of Results / Summer Break Ends",       source:"academic",type:"result",    noClass:true,info:true},
+}
+const SOURCE_LABELS={
+  "national":  "🇮🇳 National Holiday",
+  "bput":      "🏛 BPUT Official Holiday 2026 (No.BPUT/VI/Estt./277/19/8568)",
+  "academic":  "🎓 BPUT Academic Calendar — Even Sem 2025-26 (6th Sem Column)",
+};
+
+const TYPE_COLORS={
+  "national":    "#EE4870",
+  "state":       "#9878E8",
+  "festival":    "#9878E8",
+  "classtest":   "#F0BE28",
+  "classstart":  "#20C878",
+  "exam":        "#F07830",
+  "exams":       "#EE4870",
+  "semclose":    "#EE4870",
+  "break":       "#20C878",
+  "result":      "#18C4A8",
+};
+
+function isHoliday(dkStr){return HOLIDAYS[dkStr]||null}
+function isExamDay(dkStr){const h=HOLIDAYS[dkStr];return h&&h.noClass===true;}
+function isInfoEvent(dkStr){const h=HOLIDAYS[dkStr];return h&&h.info===true&&!h.noClass;}
+
+
+
+
+// ═══════════════════════════════════════════════════════════════════
+//  UTILS
+// ═══════════════════════════════════════════════════════════════════
+const DORD=["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+const getDay=d=>DORD[d.getDay()];
+const t2m=t=>{const[h,m]=t.split(":").map(Number);return h*60+m};
+const nowM=()=>{const n=new Date();return n.getHours()*60+n.getMinutes()};
+const stSt=s=>{const n=nowM(),a=t2m(s.start),b=t2m(s.end);return n<a?"up":n<b?"now":"done"};
+const stPg=s=>Math.min(100,Math.max(0,((nowM()-t2m(s.start))/(t2m(s.end)-t2m(s.start)))*100));
+function dk(y,m,d){return`${y}-${String(m+1).padStart(2,"0")}-${String(d).padStart(2,"0")}`}
+
+function dayPeriods(dayName){
+  const sl=TT[dayName];
+  if(!sl||sl==="extra"||sl==="holiday")return[];
+  const out=[];
+  sl.forEach((p,i)=>{if(!p||SLOTS[i].lunch||p.cont)return;out.push({p,slot:SLOTS[i],idx:i});});
+  return out;
+}
+
+// ═══════════════════════════════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════════════════════════════
+let curDay=getDay(new Date());
+let calY=new Date().getFullYear(),calM=new Date().getMonth();
+let modalDate="",modalData={};
+
+// ═══════════════════════════════════════════════════════════════════
+//  TABS
+// ═══════════════════════════════════════════════════════════════════
+function switchTab(n){
+  document.querySelectorAll(".panel").forEach(p=>p.classList.remove("active"));
+  document.querySelectorAll(".tb").forEach(b=>b.classList.remove("active"));
+  document.getElementById("panel-"+n).classList.add("active");
+  document.getElementById("tab-"+n).classList.add("active");
+  if(n==="attendance")renderAtt();
+}
+
+// ═══════════════════════════════════════════════════════════════════
+//  CLOCK
+// ═══════════════════════════════════════════════════════════════════
+function updClock(){
+  const n=new Date();
+  document.getElementById("clockTime").textContent=n.toLocaleTimeString("en-IN",{hour12:true,hour:"2-digit",minute:"2-digit",second:"2-digit"});
+  document.getElementById("clockDate").textContent=n.toLocaleDateString("en-IN",{day:"numeric",month:"short",year:"numeric"});
+  document.getElementById("clockDay").textContent=getDay(n);
+}
+
+// ═══════════════════════════════════════════════════════════════════
+//  STATUS BAR
+// ═══════════════════════════════════════════════════════════════════
+function updStatus(){
+  const today=getDay(new Date()),slots=TT[today];
+  const stEl=document.getElementById("st"),nxEl=document.getElementById("nx");
+  const dot=document.getElementById("sdot"),bar=document.getElementById("cs");
+  if(!slots||slots==="extra"||slots==="holiday"){
+    stEl.innerHTML=`<b>No regular classes today</b> ${slots==="extra"?"— Extra/doubt clearing 📚":"— Sunday, rest up! 😴"}`;
+    nxEl.textContent="";dot.style.background="var(--m1)";dot.style.boxShadow="none";bar.style.borderColor="var(--bd2)";return;
+  }
+  const nm=nowM();let cur=null,nxt=null,fc=false;
+  slots.forEach((p,i)=>{
+    if(!p||SLOTS[i].lunch||p.cont)return;
+    const s=SLOTS[i],st2=t2m(s.start),en=t2m(s.end);
+    if(nm>=st2&&nm<en){cur={p,s,i};fc=true;}
+    if(!fc&&nm<st2&&!nxt)nxt={p,s,i};
+  });
+  if(fc){nxt=null;for(let i=cur.i+1;i<slots.length;i++){if(slots[i]&&!SLOTS[i].lunch&&!slots[i].cont){nxt={p:slots[i],s:SLOTS[i],i};break;}}}
+  if(cur){
+    const S=SUBJ[cur.p.subj]||{};
+    dot.style.background=S.color||"var(--grn)";dot.style.boxShadow=`0 0 8px ${S.color}`;bar.style.borderColor=S.color;
+    const pct=Math.round(stPg(cur.s));
+    stEl.innerHTML=`<b style="color:${S.color}">NOW:</b> ${cur.p.subj} — ${S.name} <span style="color:var(--m2);font-size:11.5px">${cur.p.room}</span> <small style="color:var(--m2)">${pct}% done</small>`;
+    nxEl.textContent=nxt?`Next: ${nxt.p.subj} at ${nxt.s.label}`:"Last class ✓";
+  } else if(nm<t2m(SLOTS[0].start)){
+    stEl.innerHTML=`<b>Classes haven't started.</b> First at 9:00 AM`;
+    dot.style.background="var(--teal)";dot.style.boxShadow="0 0 8px var(--teal)";bar.style.borderColor="var(--teal)";
+    nxEl.textContent=nxt?`First: ${nxt.p.subj}`:"";
+  } else if(nm>=t2m("13:00")&&nm<t2m("14:30")){
+    stEl.innerHTML=`<b style="color:var(--gld)">🍽 Lunch Break</b> — Resumes 2:30 PM`;
+    dot.style.background="var(--gld)";dot.style.boxShadow="0 0 8px var(--gld)";bar.style.borderColor="var(--gld)";
+    nxEl.textContent=nxt?`Next: ${nxt.p.subj} at ${nxt.s.label}`:"";
+  } else if(nm>=t2m(SLOTS[SLOTS.length-1].end)){
+    stEl.innerHTML=`<b>All classes done! 🎉</b> See you tomorrow`;
+    dot.style.background="var(--m1)";dot.style.boxShadow="none";bar.style.borderColor="var(--bd2)";nxEl.textContent="";
+  } else {
+    stEl.innerHTML=`<b>Free slot right now.</b>`;dot.style.background="var(--m2)";dot.style.boxShadow="none";
+    nxEl.textContent=nxt?`Next: ${nxt.p.subj} at ${nxt.s.label}`:"";
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════
+//  COMPACT CARD
+// ═══════════════════════════════════════════════════════════════════
+function buildCard(dayName,badge,bc){
+  const slots=TT[dayName],isT=dayName===getDay(new Date());
+  let inner="";
+  if(!slots||slots==="holiday"){inner=`<div class="pi free">🌙 No Classes — Sunday</div>`;}
+  else if(slots==="extra"){inner=`<div class="pi" style="justify-content:center;color:var(--org);font-size:12px;border-color:rgba(240,120,48,.3)">📚 Extra / Doubt Clearing</div>`;}
+  else{
+    slots.forEach((p,i)=>{
+      const sl=SLOTS[i];
+      if(sl.lunch){inner+=`<div class="pi lunch">🍽 Lunch (1–2:30 PM)</div>`;return;}
+      if(!p){inner+=`<div class="pi free">— Free</div>`;return;}
+      if(p.cont)return;
+      const st=isT?stSt(sl):"up";
+      let cl="";if(st==="now")cl="now";else if(st==="done")cl="done";if(p.lab)cl+=" labp";
+      const S=SUBJ[p.subj]||{color:"#888",bg:"rgba(128,128,128,.2)"};
+      inner+=`<div class="pi ${cl}">
+        <div class="sp" style="background:${S.bg};color:${S.color}">${p.subj.substring(0,2)}</div>
+        <div class="pdv" style="background:${S.color}33"></div>
+        <div class="pi-info">
+          <div class="pn" style="color:${S.color}">${p.subj}${p.note?` <span style="font-size:9px;font-weight:600;color:var(--m2)">(${p.note})</span>`:""}</div>
+          <div class="pm"><span class="pr">${p.room}</span><span>${sl.label}</span></div>
+        </div>
+        ${st==="now"?`<div class="nb">NOW</div>`:""}
+      </div>`;
+    });
+  }
+  return `<div class="dc">
+    <div class="dch"><span class="dn">${dayName}</span><span class="dbd ${bc}">${badge}</span></div>
+    <div class="pl">${inner}</div>
+  </div>`;
+}
+
+// ═══════════════════════════════════════════════════════════════════
+//  FULL TIMELINE
+// ═══════════════════════════════════════════════════════════════════
+function buildTimeline(dayName){
+  const slots=TT[dayName],isT=dayName===getDay(new Date());
+  const el=document.getElementById("fdv");
+  document.getElementById("fdl").textContent=`Full Schedule — ${dayName}`;
+  if(!slots||slots==="holiday"){el.innerHTML=`<div class="noclass"><div class="em">🌙</div><h3>No Classes</h3><p>Enjoy your Sunday!</p></div>`;document.getElementById("dpRow").style.display="none";return;}
+  if(slots==="extra"){el.innerHTML=`<div class="satban"><h2>Saturday — Extra Classes</h2><p>Extra/doubt clearing if not a holiday. Confirm with faculty.</p></div>`;document.getElementById("dpRow").style.display="none";return;}
+  let tot=0,dn=0;
+  slots.forEach((p,i)=>{if(p&&!SLOTS[i].lunch&&!p.cont){tot++;if(isT&&stSt(SLOTS[i])==="done")dn++;}});
+  const pct=tot?Math.round((dn/tot)*100):0;
+  if(isT){
+    document.getElementById("dpRow").style.display="flex";
+    document.getElementById("dpt").textContent=`${dn} of ${tot} done`;
+    document.getElementById("pf").style.width=pct+"%";
+    document.getElementById("dpp").textContent=pct+"%";
+  } else document.getElementById("dpRow").style.display="none";
+
+  // OUTR G3 parallel lab notes
+  const monN="";
+  const wedN=dayName==="Wednesday"?`<div class="inote">ℹ️ <b>Wed 10 AM–1 PM:</b> G3 → JAVA LAB CL4 &nbsp;|&nbsp; G1 → COA LAB A306 &nbsp;|&nbsp; G2 → DS LAB CL3 (parallel groups)</div>`:"";
+  const thuN=dayName==="Thursday"?`<div class="inote">ℹ️ <b>Thu 10 AM–1 PM:</b> G3 → DS LAB CL4 &nbsp;|&nbsp; G2 → COA LAB A306 &nbsp;|&nbsp; G1 → CN LAB CL3 (parallel groups)<br>⚠️ <b>Thu 2–5 PM:</b> JAVA LAB is CSE1 only — G3 is FREE this slot</div>`:"";
+  const friN=dayName==="Friday"?`<div class="inote">ℹ️ <b>Fri 2–5 PM:</b> G3 → COA LAB A306 &nbsp;|&nbsp; G2 → CN LAB CL6 &nbsp;|&nbsp; G1 → DS LAB CL8 (parallel groups)</div>`:"";
+  const tuN=dayName==="Tuesday"?`<div class="inote">ℹ️ <b>Tue 2–3 PM:</b> G3 → CN LAB CL6 &nbsp;|&nbsp; <b>3–5 PM:</b> JAVA LAB CSE2 (MCA LAB) — G3 is FREE this slot</div>`:"";
+
+  let html=monN+wedN+thuN+friN+tuN+`<div class="tl">`;
+  slots.forEach((p,i)=>{
+    if(p&&p.cont)return;
+    const sl=SLOTS[i],st=isT?stSt(sl):"up";
+    const dc=st==="now"?"active":st==="done"?"done":"";
+    html+=`<div class="tli">
+      <div class="ttc"><div class="tt">${sl.label}</div></div>
+      <div class="tline"><div class="tdot ${dc}"></div><div class="tvl"></div></div>`;
+    if(sl.lunch){
+      html+=`<div class="tc lunch">🍽 Lunch Break <span style="font-size:11px;color:var(--m1)">1:00 – 2:30 PM</span></div>`;
+    } else if(!p){
+      html+=`<div class="tc free">— Free Period</div>`;
+    } else {
+      const S=SUBJ[p.subj]||{color:"#888",bg:"rgba(128,128,128,.2)",name:p.subj,teacher:"",lab:false};
+      const isLab=p.lab||S.lab;
+      let cc="tc";if(st==="now")cc+=" now";if(st==="done")cc+=" done";if(isLab)cc+=" labp";
+      let j=i+1,se="";while(j<slots.length&&slots[j]&&slots[j].cont){se=SLOTS[j].label.split("–")[1]||"";j++;}
+      const dur=se?`${sl.label.split("–")[0]} – ${se}`:sl.label;
+      const pg=st==="now"?`<div class="tpb"><div class="tpf" style="width:${Math.round(stPg(sl))}%"></div></div>`:"";
+      html+=`<div class="${cc}">
+        <div class="tr">
+          <div style="min-width:0">
+            <div class="ts" style="color:${S.color}">${p.subj}${p.note?` <span style="font-size:.62rem;font-weight:600;color:var(--m2)"> · ${p.note}</span>`:""}</div>
+            <div class="tf">${S.name}</div>
+            <div class="tm">
+              <div class="trm">${p.room}</div>
+              <div class="tty ${isLab?"lab":"lec"}">${isLab?"Lab":"Lecture"}</div>
+              ${se?`<span style="font-size:10.5px;color:var(--m2)">${dur}</span>`:""}
+            </div>
+            <div class="tteach">${S.teacher}</div>
+          </div>
+          ${st==="now"?`<div class="tnb">LIVE</div>`:""}
+        </div>${pg}
+      </div>`;
+    }
+    html+=`</div>`;
+  });
+  html+=`</div>`;
+  el.innerHTML=html;
+}
+
+// ═══════════════════════════════════════════════════════════════════
+//  ATTENDANCE — localStorage
+// ═══════════════════════════════════════════════════════════════════
+const AK="outr_att_v1";
+function loadA(){try{return JSON.parse(lsGet(AK)||"{}")}catch(e){return{}}}
+function saveA(d){lsSet(AK,JSON.stringify(d))}
+
+// ═══════════════════════════════════════════════════════════════════
+//  MODAL
+// ═══════════════════════════════════════════════════════════════════
+function openModal(dateStr){
+  const d=new Date(dateStr+"T12:00:00");
+  const dayName=getDay(d);
+  const periods=dayPeriods(dayName);
+  const hol=isHoliday(dateStr);
+  if(periods.length===0&&!hol&&TT[dayName]!=="extra"){
+    alert("No classes on this day.");return;
+  }
+  modalDate=dateStr;
+  const att=loadA();
+  modalData={...(att[dateStr]||{})};
+  // Auto-fill cancelled for holidays AND exam/no-class days
+  const shouldAutoCancel=(hol&&Object.keys(modalData).length===0);
+  if(shouldAutoCancel){
+    periods.forEach(({slot})=>{modalData[slot.id]="C";});
+  }
+  const dStr=d.toLocaleDateString("en-IN",{weekday:"long",day:"numeric",month:"long",year:"numeric"});
+  document.getElementById("mtt").textContent=dStr;
+  // Holiday / academic event notice
+  const hn=document.getElementById("holNotice");
+  if(hol){
+    const tc=TYPE_COLORS[hol.type]||"var(--vio)";
+    const isExam=hol.noClass===true;
+    const isInfoEv=hol.info===true&&!hol.noClass;
+    let icon="🏖";
+    if(hol.type==="exams"||hol.type==="semclose")icon="📝";
+    else if(hol.type==="classtest")icon="📋";
+    else if(hol.type==="break"||hol.type==="result")icon="🎉";
+    else if(hol.type==="exam")icon="📋";
+    hn.innerHTML=`<div class="hol-notice" style="border-color:${tc}33;background:${tc}11;color:${tc}">
+      ${icon} <b>${hol.name}</b><br>
+      <span style="font-size:11.5px;font-weight:500;color:var(--m2)">${SOURCE_LABELS[hol.source]||hol.source}</span><br>
+      <span style="font-size:11px;font-weight:500;opacity:.8">${isExam?"⚠️ No regular classes. Marked as Cancelled automatically.":isInfoEv?"ℹ️ Academic event — classes may still be held. Mark attendance below.":"Classes auto-marked as Cancelled. You can override below."}</span>
+    </div>`;
+  } else hn.innerHTML="";
+  // Periods
+  let html="";
+  if(periods.length===0){html=`<div style="color:var(--m2);font-size:13px;padding:10px 0;font-weight:600">No regular classes scheduled for ${dayName}.</div>`;}
+  periods.forEach(({p,slot})=>{
+    const S=SUBJ[p.subj]||{color:"#888",bg:"rgba(128,128,128,.2)"};
+    const cur=modalData[slot.id]||"";
+    html+=`<div class="mpr" id="mpr_${slot.id}">
+      <div class="mpl">
+        <div class="msp" style="background:${S.bg};color:${S.color}">${p.subj.substring(0,2)}</div>
+        <div>
+          <div class="mpn">${p.subj}${p.note?` (${p.note})`:""}</div>
+          <div class="mpt">${slot.label}</div>
+        </div>
+      </div>
+      <div class="ab">
+        <button class="bp2${cur==="P"?" sel":""}" onclick="setOne('${slot.id}','P',this)">✓</button>
+        <button class="ba${cur==="A"?" sel":""}"  onclick="setOne('${slot.id}','A',this)">✗</button>
+        <button class="bc2${cur==="C"?" sel":""}" onclick="setOne('${slot.id}','C',this)">—</button>
+      </div>
+    </div>`;
+  });
+  document.getElementById("mperiods").innerHTML=html;
+  document.getElementById("modal").classList.remove("hidden");
+  document.body.style.overflow="hidden";
+}
+
+function setOne(slotId,val,btn){
+  modalData[slotId]=val;
+  const row=document.getElementById("mpr_"+slotId);
+  if(row){
+    row.querySelectorAll(".ab button").forEach(b=>b.classList.remove("sel"));
+    btn.classList.add("sel");
+  }
+}
+
+// FIX: setAll now correctly updates both modalData and the UI buttons
+function setAll(val){
+  const d=new Date(modalDate+"T12:00:00");
+  const periods=dayPeriods(getDay(d));
+  periods.forEach(({slot})=>{
+    modalData[slot.id]=val;
+    const row=document.getElementById("mpr_"+slot.id);
+    if(row){
+      row.querySelectorAll(".ab button").forEach(b=>b.classList.remove("sel"));
+      const idx=val==="P"?0:val==="A"?1:2;
+      const btns=row.querySelectorAll(".ab button");
+      if(btns[idx])btns[idx].classList.add("sel");
+    }
+  });
+  // Highlight active quick action btn
+  document.querySelectorAll(".qab").forEach(b=>b.classList.remove("qs"));
+  const map={P:"qaP",A:"qaA",C:"qaC"};
+  if(map[val])document.getElementById(map[val]).classList.add("qs");
+}
+
+function saveAtt(){
+  const att=loadA();
+  if(Object.keys(modalData).length>0)att[modalDate]=modalData;
+  else delete att[modalDate];
+  saveA(att);
+  closeModal();
+  renderAtt();
+}
+
+function closeModal(){
+  document.getElementById("modal").classList.add("hidden");
+  document.body.style.overflow="";
+  document.querySelectorAll(".qab").forEach(b=>b.classList.remove("qs"));
+}
+
+document.getElementById("modal").addEventListener("click",function(e){if(e.target===this)closeModal();});
+
+// ═══════════════════════════════════════════════════════════════════
+//  RENDER ATTENDANCE PANEL
+// ═══════════════════════════════════════════════════════════════════
+function renderAtt(){
+  const v=document.getElementById("mp").value;
+  if(!v)return;
+  const[y,m]=v.split("-").map(Number);
+  calY=y;calM=m-1;
+  renderSummary(y,m-1);
+  renderBar(y,m-1);
+  renderCal(y,m-1);
+}
+
+function toggleAcadEvents(){
+  const body = document.getElementById('acadBody');
+  const arrow = document.getElementById('acadArrow');
+  const isOpen = body.style.display !== 'none';
+  if(isOpen){
+    body.style.display = 'none';
+    arrow.style.transform = 'rotate(0deg)';
+  } else {
+    body.style.display = 'flex';
+    body.style.flexDirection = 'column';
+    body.style.gap = '7px';
+    arrow.style.transform = 'rotate(180deg)';
+    // Render content only when first opened
+    renderAcadEvents();
+  }
+}
+
+function goToCurrentMonth(){
+  const n=new Date();
+  const val=`${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,'0')}`;
+  document.getElementById('mp').value=val;
+  calY=n.getFullYear();
+  calM=n.getMonth();
+  renderSummary(calY,calM);
+  renderBar(calY,calM);
+  renderCal(calY,calM);
+  renderAcadEvents();
+}
+
+function chgMo(delta){
+  calM+=delta;
+  if(calM<0){calM=11;calY--;}
+  if(calM>11){calM=0;calY++;}
+  document.getElementById("mp").value=`${calY}-${String(calM+1).padStart(2,"0")}`;
+  renderSummary(calY,calM);renderBar(calY,calM);renderCal(calY,calM);renderAcadEventsIfOpen();
+}
+
+function renderAcadEventsIfOpen(){
+  // Only render academic events list if the panel is expanded
+  const body = document.getElementById('acadBody');
+  if(body && body.style.display !== 'none'){
+    renderAcadEvents();
+  }
+}
+
+function renderAcadEvents(){
+  // Key academic dates only
+  const KEY_EVENTS=[
+    // Source: OUTR Academic Calendar — Spring Semester 2025 (4th Sem UG, 2026 dates)
+    {date:"2026-02-02",label:"📖 Classes Commence — Spring Sem 2025-26",           color:"var(--grn)"},
+    {date:"2026-02-13",label:"📋 Lesson Plan Submission to IQAC",                  color:"var(--muted2)"},
+    {date:"2026-03-02",label:"📋 Attendance Display — Feb 2026 (Starts)",          color:"var(--gld)"},
+    {date:"2026-03-07",label:"📋 Attendance Display — Feb 2026 (Ends)",            color:"var(--gld)"},
+    {date:"2026-03-18",label:"🎭 X-Tasy Cultural Event Starts",                    color:"var(--vio)"},
+    {date:"2026-03-20",label:"🎭 X-Tasy Cultural Event Ends",                      color:"var(--vio)"},
+    {date:"2026-04-02",label:"📝 Midterm Examinations Begin",                      color:"var(--ros)"},
+    {date:"2026-04-10",label:"📝 Midterm Examinations Last Day",                   color:"var(--ros)"},
+    {date:"2026-05-01",label:"📋 Attendance Display — April 2026 / Mid Term Marks",color:"var(--gld)"},
+    {date:"2026-05-29",label:"🔔 Last Day of Classes — Spring Semester",           color:"var(--ros)"},
+    {date:"2026-05-30",label:"📋 Attendance Report Submission by Schools",         color:"var(--muted2)"},
+    {date:"2026-06-02",label:"📋 Marks Submission by HoS/HoD Starts",             color:"var(--muted2)"},
+    {date:"2026-06-04",label:"📝 End Term Examinations Begin",                     color:"var(--ros)"},
+    {date:"2026-06-12",label:"📝 End Term Examinations Last Day",                  color:"var(--ros)"},
+    {date:"2026-06-13",label:"🎉 Summer Break Begins",                             color:"var(--grn)"},
+    {date:"2026-06-30",label:"📊 Declaration of Results / Summer Break Ends",     color:"var(--teal)"},
+  ];
+  const today=new Date();
+  let html="";
+  KEY_EVENTS.forEach(ev=>{
+    const evDate=new Date(ev.date+"T00:00:00");
+    const isPast=evDate<today;
+    const isNear=!isPast&&(evDate-today)<7*24*60*60*1000;
+    const dStr=evDate.toLocaleDateString("en-IN",{day:"numeric",month:"short",year:"numeric"});
+    const day=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"][evDate.getDay()];
+    html+=`<div style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:9px;background:var(--s2);border:1px solid var(--bd1);opacity:${isPast?".38":"1"}">
+      <div style="flex-shrink:0;text-align:right;min-width:80px">
+        <div style="font-size:11.5px;font-weight:800;color:${isPast?"var(--m1)":ev.color}">${dStr}</div>
+        <div style="font-size:10px;color:var(--m1);font-weight:600">${day}</div>
+      </div>
+      <div style="width:3px;height:32px;border-radius:2px;flex-shrink:0;background:${isPast?"var(--bd1)":ev.color}"></div>
+      <div style="font-size:12.5px;font-weight:${isNear?"800":"600"};color:${isPast?"var(--m2)":"var(--w)"}">${ev.label}${isNear?` <span style="background:var(--ros);color:#fff;font-size:9px;border-radius:100px;padding:1px 7px;margin-left:4px;font-weight:800">SOON</span>`:""}</div>
+    </div>`;
+  });
+  const el=document.getElementById("acadList");
+  if(el)el.innerHTML=html;
+}
+
+function getDays(y,m){
+  const att=loadA(),total=new Date(y,m+1,0).getDate(),days=[];
+  for(let d=1;d<=total;d++){
+    const dkStr=dk(y,m,d);
+    days.push({d,dk:dkStr,dayName:getDay(new Date(y,m,d)),data:att[dkStr]||null,hol:isHoliday(dkStr)});
+  }
+  return days;
+}
+
+function renderSummary(y,m){
+  const days=getDays(y,m);
+  let totC=0,totP=0,totA=0,totCan=0,totHol=0;
+  days.forEach(({dayName,data,hol})=>{
+    const ps=dayPeriods(dayName);if(!ps.length)return;
+    if(hol&&!data){totHol+=ps.length;return;}
+    ps.forEach(({slot})=>{
+      totC++;
+      const v=data?data[slot.id]:"";
+      if(v==="P")totP++;else if(v==="A")totA++;else if(v==="C")totCan++;
+    });
+  });
+  const marked=totP+totA;
+  const pct=marked>0?Math.round((totP/marked)*100):0;
+  const ov=totC>0?Math.round((totP/totC)*100):0;
+  const gc=pct>=75?"c-grn":pct>=60?"c-org":"c-red";
+  document.getElementById("asum").innerHTML=`
+    <div class="asc c-acc"><div class="av">${totC}</div><div class="al">Total</div></div>
+    <div class="asc c-grn"><div class="av">${totP}</div><div class="al">Present</div></div>
+    <div class="asc c-red"><div class="av">${totA}</div><div class="al">Absent</div></div>
+    <div class="asc c-gld"><div class="av">${totCan}</div><div class="al">Cancelled</div></div>
+    <div class="asc ${gc}"><div class="av">${pct}%</div><div class="al">Att. %</div></div>
+    <div class="asc c-org"><div class="av">${ov}%</div><div class="al">Overall</div></div>`;
+}
+
+function renderBar(y,m){
+  const days=getDays(y,m),sc={};
+  Object.keys(SUBJ).forEach(k=>{sc[k]={P:0,A:0,C:0,tot:0}});
+  days.forEach(({dayName,data})=>{
+    dayPeriods(dayName).forEach(({p,slot})=>{
+      if(!sc[p.subj])return;
+      sc[p.subj].tot++;
+      const v=data?data[slot.id]:"";
+      if(v==="P")sc[p.subj].P++;else if(v==="A")sc[p.subj].A++;else if(v==="C")sc[p.subj].C++;
+    });
+  });
+  let html="";
+  Object.entries(sc).forEach(([abbr,c])=>{
+    if(c.tot===0)return;
+    const mk=c.P+c.A,pct=mk>0?Math.round((c.P/mk)*100):0;
+    const S=SUBJ[abbr]||{color:"#888"};
+    const col=pct>=75?S.color:"#EE4870";
+    html+=`<div class="br">
+      <div class="bl">${abbr}</div>
+      <div class="bt2"><div class="bf" style="width:${pct}%;background:${col}"><span class="bp">${pct>10?pct+"%":""}</span></div></div>
+      <div class="bct">${c.P}/${mk}</div>
+    </div>`;
+  });
+  document.getElementById("barchart").innerHTML=html||`<div style="color:var(--m2);font-size:13px;text-align:center;padding:16px;font-weight:600">No data yet for this month.</div>`;
+}
+
+function renderCal(y,m){
+  const MONTHS=["January","February","March","April","May","June","July","August","September","October","November","December"];
+  document.getElementById("calTitle").textContent=`${MONTHS[m]} ${y}`;
+  const today=new Date(),todayStr=dk(today.getFullYear(),today.getMonth(),today.getDate());
+  const firstDay=new Date(y,m,1).getDay(),totalDays=new Date(y,m+1,0).getDate();
+  const days=getDays(y,m);
+  let html="";
+  for(let i=0;i<firstDay;i++)html+=`<div class="cc empty"></div>`;
+
+  days.forEach(({d,dk:dkStr,dayName,data,hol})=>{
+    const ps=dayPeriods(dayName);
+    const isT=dkStr===todayStr;
+    const isWkd=(dayName==="Sunday");
+    const noRegClass=ps.length===0&&TT[dayName]!=="extra";
+    const examDay=hol&&hol.noClass===true;
+    const infoOnly=hol&&hol.info===true&&!hol.noClass;
+
+    // Determine cell class
+    let cl="cc"+(isT?" tc2":"");
+    let dots="",holTag="";
+    let clickable=true;
+
+    if(isWkd&&!hol){
+      // Sunday with no holiday — not clickable
+      cl+=" nc";clickable=false;
+    } else if(noRegClass&&!hol){
+      // Weekday with no classes and no event — not clickable
+      cl+=" nc";clickable=false;
+    } else if(hol){
+      // ALL holiday/event types — always clickable so user can override
+      const tc=TYPE_COLORS[hol.type]||"#9878E8";
+      const cleanName=hol.name.replace(/[📝🎉📊🎓🔔📋📖💰📢]/gu,"").trim();
+      const shortName=cleanName.split(" ").slice(0,3).join(" ");
+      holTag=`<div class="hol-tag" style="color:${tc}">${shortName}</div>`;
+      // Apply visual class based on type
+      if(hol.noClass===true){
+        cl+=" exam";
+      } else if(hol.type==="classtest"){
+        cl+=" clstest";
+      } else if(hol.type==="break"||hol.type==="result"||hol.type==="classstart"){
+        cl+=" brk";
+      } else if(hol.info===true){
+        cl+=" info-ev";
+      } else if(hol.type==="national"||hol.type==="state"||hol.type==="festival"){
+        cl+=" hday";
+      } else {
+        cl+=" info-ev";
+      }
+    } else if(data&&ps.length>0){
+      const vals=ps.map(({slot})=>data[slot.id]||"");
+      const allC=vals.every(v=>v==="C"),allP=vals.every(v=>v==="P"),anyA=vals.some(v=>v==="A"),anyP=vals.some(v=>v==="P");
+      if(allC)cl+=" ac";
+      else if(allP)cl+=" fp";
+      else if(anyA&&!anyP)cl+=" aa";
+      else if(anyP||anyA)cl+=" pa";
+      const dc=vals.slice(0,4).map(v=>v==="P"?"#20C878":v==="A"?"#EE4870":v==="C"?"#5BA0F0":"#253348");
+      dots=`<div class="cdots">${dc.map(c=>`<div class="cdot" style="background:${c}"></div>`).join("")}</div>`;
+    }
+
+    const onclick=clickable?`onclick="onCalClick('${dkStr}')"`:` `;
+    const title=`${dayName}${hol?" · "+hol.name.replace(/📝|🎉|📊|🎓|🔔/g,"").trim():""}`;
+    html+=`<div class="${cl}" ${onclick} title="${title}">${d}${holTag}${dots}</div>`;
+  });
+  document.getElementById("calGrid").innerHTML=html;
+}
+
+
+function onCalClick(dkStr){
+  const hol=isHoliday(dkStr);
+  const hiEl=document.getElementById("hinfo");
+  if(hol){
+    const tc=TYPE_COLORS[hol.type]||"var(--vio)";
+    const srcLabel=SOURCE_LABELS[hol.source]||hol.source;
+    hiEl.innerHTML=`<b style="color:${tc}">${hol.name}</b><br>${srcLabel}<div class="src" style="margin-top:4px;font-size:10.5px;color:var(--m1)">📄 Source: ${hol.source==="bput"?"BPUT Office Holiday Notification No.BPUT/VI/Estt./277/19/8568, Date: 06.12.2025":hol.source==="national"?"Ministry of Personnel, Govt. of India":hol.source==="academic"?"OUTR Academic Calendar — Spring Semester 2025 (4th Sem UG)":"BPUT Official"}</div>`;
+    hiEl.classList.add("show");
+  } else hiEl.classList.remove("show");
+  // For pure academic no-class events (exams/break), show info but also open modal so user can still log
+  openModal(dkStr);
+}
+
+function confirmClear(){
+  if(confirm("Clear ALL attendance data? This cannot be undone.")){lsRemove(AK);renderAtt();}
+}
+
+// ═══════════════════════════════════════════════════════════════════
+//  LEGEND
+// ═══════════════════════════════════════════════════════════════════
+function buildLegend(){
+  let html="";
+  Object.entries(SUBJ).forEach(([abbr,S])=>{
+    html+=`<div class="li">
+      <div class="lpill" style="background:${S.bg};color:${S.color}">${abbr.substring(0,3)}</div>
+      <div>
+        <div class="lcode">${S.code||""}${S.lab?" · Lab":""}</div>
+        <div class="lname">${S.name}</div>
+        <div class="lteach">${S.teacher}</div>
+      </div>
+    </div>`;
+  });
+  document.getElementById("lgrid").innerHTML=html;
+}
+
+// ═══════════════════════════════════════════════════════════════════
+//  NAVIGATION
+// ═══════════════════════════════════════════════════════════════════
+function selDay(day){
+  curDay=day;
+  document.querySelectorAll(".dnav button[data-day]").forEach(b=>b.classList.toggle("active",b.dataset.day===day));
+  buildTimeline(day);
+}
+function goToday(){
+  document.getElementById("datePicker").value="";
+  selDay(getDay(new Date()));
+}
+function onDatePick(){
+  const v=document.getElementById("datePicker").value;if(!v)return;
+  const d=new Date(v+"T12:00:00"),day=getDay(d);
+  document.querySelectorAll(".dnav button[data-day]").forEach(b=>b.classList.remove("active"));
+  buildTimeline(day);
+  document.getElementById("fdl").textContent=`Full Schedule — ${day} (${d.toLocaleDateString("en-IN",{day:"numeric",month:"short",year:"numeric"})})`;
+}
+function buildQuick(){
+  const t=new Date(),tn=getDay(t);
+  const tm=new Date(t);tm.setDate(t.getDate()+1);
+  document.getElementById("quickGrid").innerHTML=buildCard(tn,"Today","bt")+buildCard(getDay(tm),"Tomorrow","bm");
+}
+
+// ═══════════════════════════════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════════════════════════════
+
+// Show storage warning if on file:// or content:// (not https://)
+function checkStorageWarning() {
+  const proto = window.location.protocol;
+  if (proto === 'file:' || proto === 'content:') {
+    const dismissed = lsGet('storage_warn_dismissed');
+    if (!dismissed) {
+      document.getElementById('storageBanner').style.display = 'block';
+    }
+  }
+}
+
+function init(){
+  checkStorageWarning();
+  updClock();updStatus();buildQuick();buildLegend();
+  const today=getDay(new Date());
+  document.querySelectorAll(".dnav button[data-day]").forEach(b=>{
+    if(b.dataset.day===today)b.classList.add("active","tbtn");
+  });
+  const n=new Date();
+  document.getElementById("datePicker").value=n.toISOString().split("T")[0];
+  document.getElementById("mp").value=`${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,"0")}`;
+  buildTimeline(today);curDay=today;
+  setInterval(()=>{updClock();updStatus();},1000);
+  setInterval(()=>{buildQuick();buildTimeline(curDay);},30000);
+}
+window.addEventListener("DOMContentLoaded",init);
+</script>
+
+<!-- Storage Warning Banner -->
+<div id="storageBanner" style="display:none;position:fixed;bottom:calc(72px + env(safe-area-inset-bottom));left:12px;right:12px;z-index:4000;
+  background:#1C1220;border:1.5px solid #F0BE28;border-radius:14px;padding:14px 16px;
+  box-shadow:0 8px 32px rgba(0,0,0,.6);font-family:var(--ff)">
+  <div style="font-size:13px;font-weight:800;color:#F0BE28;margin-bottom:6px">⚠️ Attendance data won't save permanently</div>
+  <div style="font-size:12px;color:#7890B0;line-height:1.5;margin-bottom:10px">
+    You're opening this file locally. Chrome may delete your data after a few days.<br>
+    <b style="color:#DDE8FF">For permanent storage, open from the hosted link instead.</b>
+  </div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap">
+    <button onclick="document.getElementById('storageBanner').style.display='none'"
+      style="background:rgba(240,190,40,.15);border:1px solid #F0BE28;color:#F0BE28;
+      border-radius:100px;padding:7px 16px;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--ff)">
+      Got it
+    </button>
+  </div>
+</div>
+
+</body>
+</html>
